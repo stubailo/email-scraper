@@ -19,7 +19,6 @@ app.get('/callback', async (req, res) => {
   const { code } = req.query;
   const { tokens } = await getToken(code);
   const profile = await getProfile(tokens.access_token);
-  console.log(profile);
   fs.readFile('./prefs.json', 'utf-8', (err, json) => {
     if (err) {
       const data = JSON.stringify({ accounts: { [profile.emailAddress]: Object.assign(profile, { tokens }) } });
@@ -37,7 +36,7 @@ app.get('/callback', async (req, res) => {
     }
   });
 
-  res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
+  res.send('<script> window.close(); </script>')
 });
 
 app.listen(process.env.PORT || 3000, () => {

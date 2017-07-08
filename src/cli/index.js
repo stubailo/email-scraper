@@ -40,7 +40,7 @@ async function configureInboxView(type = 'list') {
 
   this.status.stop();
   const answers = await this.inboxView(emails, type);
-  await inboxViewLogic(answers)
+  await this.inboxViewLogic(answers)
 }
 
 async function inboxViewLogic (answers) {
@@ -106,6 +106,7 @@ module.exports = async (accounts) => {
     base,
     { accounts },
     { configureInboxView },
+    { inboxViewLogic },
     { oauth2Client: await oauth2Client() },
   );
   this.homeMenu();

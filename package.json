@@ -58,7 +58,7 @@
     "nsp": "^2.6.3"
   },
   "scripts": {
-    "pretest": "eslint . --fix",
+    "eslint-fix": "eslint . --fix",
     "test": "jest",
     "build": "babel src -d lib --copy-files"
   },
