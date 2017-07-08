@@ -1,6 +1,21 @@
 language: node_js
 node_js:
-  - 7
-  - 6
-  - 4
-after_script: 'cat ./coverage/lcov.info | coveralls'
+- 7
+branches:
+  only:
+  - master
+before_install:
+- npm install -g npm@'>=2.13.5'
+install:
+- npm i nyc -g
+- npm set progress=false
+- npm install
+script:
+- npm run travis-test
+- npm run build
+deploy:
+  provider: npm
+  email: ben@focuswish.com
+  api_key:
+env:
+  global:
