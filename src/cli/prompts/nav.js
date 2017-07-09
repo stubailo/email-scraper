@@ -14,7 +14,7 @@ module.exports = async function ({ source, threadId, messageId }) {
       await this.configureInboxView();
       break;
     case answers.nav === 'reply':
-      this.replyToMessage(mail);
+      this.replyToMessage(mail, threadId);
       break;
     case answers.nav === 'delete':
       this.deleteMsg(messageId);
