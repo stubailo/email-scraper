@@ -7,7 +7,6 @@ module.exports = async function ({ source, threadId, messageId }) {
   const mail = await quickMailParse(source);
 
   this.ui.log.write(arr.join('\n'));
-  console.log(this)
   inquirer.prompt(reply)
     .then(async (answers) => {
       switch (true) {
