@@ -1,8 +1,7 @@
 const google = require('googleapis');
-
 const gmail = google.gmail({ version: 'v1' });
 
-module.exports = function deleteMsg (messageId) {
+module.exports = function (messageId) {
   gmail.users.messages.trash({
     auth: this.oauth2Client,
     userId: 'me',

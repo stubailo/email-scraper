@@ -7,24 +7,23 @@ module.exports = async function ({ source, threadId, messageId }) {
   const mail = await quickMailParse(source);
 
   this.ui.log.write(arr.join('\n'));
-  inquirer.prompt(reply)
-    .then(async (answers) => {
-      switch (true) {
-        case answers.nav === 'back':
-          await this.configureInboxView();
-          break;
-        case answers.nav === 'reply':
-          this.replyToMessage(mail);
-          break;
-        case answers.nav === 'delete':
-          this.deleteMsg(messageId);
-          await this.configureInboxView();
-          break;
-        case answers.nav === 'home':
-          this.homeMenu();
-          break;
-        case answers.nav === 'exit':
-          process.exit();
-      }
-    });
+  var answers = await inquirer.prompt(reply)
+  
+  switch (true) {
+    case answers.nav === 'back':
+      await this.configureInboxView();
+      break;
+    case answers.nav === 'reply':
+      this.replyToMessage(mail);
+      break;
+    case answers.nav === 'delete':
+      this.deleteMsg(messageId);
+      await this.configureInboxView();
+      break;
+    case answers.nav === 'home':
+      this.homeMenu();
+      break;
+    case answers.nav === 'exit':
+      process.exit();
+  }
 };

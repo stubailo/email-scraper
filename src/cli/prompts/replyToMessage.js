@@ -1,8 +1,8 @@
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 
-module.exports = function (mail) {
-  return inquirer.prompt([
+module.exports = async function (mail) {
+  var answers = await inquirer.prompt([
     {
       type: 'input',
       name: 'subject',
@@ -22,11 +22,11 @@ module.exports = function (mail) {
       name: 'confirmation',
       message: 'Send?',
     },
-  ]).then((answers) => {
-    const text = answers.draft;
-    const { to, subject } = answers;
-    this.send({ text, subject, to, threadId, from: this.account.emailAdress });
-    console.log(chalk.green('Success!'));
-    this.configureInboxView();
-  });
+  ])
+  
+  const text = answers.draft;
+  const { to, subject } = answers;
+  this.send({ text, subject, to, threadId, from: this.account.emailAdress });
+  console.log(chalk.green('Success!'));
+  this.configureInboxView();
 };
