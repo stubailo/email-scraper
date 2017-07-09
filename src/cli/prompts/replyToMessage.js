@@ -26,7 +26,7 @@ module.exports = async function (mail, threadId) {
   if(answers.confirmation) {
     const text = answers.draft;
     const { to, subject } = answers;
-    this.send({ text, subject, to, threadId, from: this.account.emailAdress });
+    this.send({ text, subject, to, threadId, from: this.account.emailAddress });
     console.log(chalk.green('Success!'));
   } 
   this.configureInboxView(); 
