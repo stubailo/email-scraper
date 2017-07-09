@@ -45,6 +45,7 @@ async function configureInboxView(type = 'list') {
 
 async function inboxViewLogic (answers) {
   var accessToken = this.account.tokens.access_token
+  var messages = this.messages
   switch (true) {
     case answers.menu === 'compose':
       inquirer.prompt(create).then((answers) => {
@@ -52,7 +53,7 @@ async function inboxViewLogic (answers) {
         const from = this.account.emailAddress;
         this.sendNew({ to, subject, from, text });
       }).then(() => { this.configureInboxView(); });
-
+      break
     case answers.menu === 'bulk':
       this.configureInboxView('checkbox');
       break;
