@@ -2,7 +2,7 @@ const inquirer = require('inquirer');
 const { reply } = require('../constants');
 const { parseAndFormatMail, quickMailParse } = require('../utils/helpers');
 
-module.exports = async function nav({ source, threadId, messageId }) {
+module.exports = async function ({ source, threadId, messageId }) {
   const arr = await parseAndFormatMail(source);
   const mail = await quickMailParse(source);
 
@@ -14,7 +14,7 @@ module.exports = async function nav({ source, threadId, messageId }) {
           await this.configureInboxView();
           break;
         case answers.nav === 'reply':
-          this.replyToMessage();
+          this.replyToMessage(mail);
           break;
         case answers.nav === 'delete':
           this.deleteMsg(messageId);

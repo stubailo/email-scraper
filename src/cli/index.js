@@ -40,12 +40,11 @@ async function configureInboxView(type = 'list') {
 
   this.status.stop();
   const answers = await this.inboxView(emails, type);
-  await this.inboxViewLogic(answers)
+  await this.inboxViewLogic(answers, messages)
 }
 
-async function inboxViewLogic (answers) {
+async function inboxViewLogic (answers, messages) {
   var accessToken = this.account.tokens.access_token
-  var messages = this.messages
   switch (true) {
     case answers.menu === 'compose':
       inquirer.prompt(create).then((answers) => {

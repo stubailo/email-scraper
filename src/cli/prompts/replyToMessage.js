@@ -2,17 +2,18 @@ const inquirer = require('inquirer');
 const chalk = require('chalk');
 
 module.exports = function (mail) {
+  console.log(mail)
   inquirer.prompt([
     {
       type: 'input',
       name: 'subject',
       message: 'Subject',
-      default: mail.subject,
+      default: mail && mail.subject ? mail.subject : '',
     }, {
       type: 'input',
       name: 'to',
       message: 'To',
-      default: mail.from.value[0].address,
+      default: mail && mail.from && mail.from.value[0].address ? mail.from.value[0].address : '',
     }, {
       type: 'input',
       name: 'draft',
@@ -25,7 +26,7 @@ module.exports = function (mail) {
   ]).then((answers) => {
     const text = answers.draft;
     const { to, subject } = answers;
-    this.send({ text, subject, to, threadId, from: mail.to.value[0].address });
+    this.send({ text, subject, to, threadId, from: this.account.emailAdress });
     console.log(chalk.green('Success!'));
     this.configureInboxView();
   });
