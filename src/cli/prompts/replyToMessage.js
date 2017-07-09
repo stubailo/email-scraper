@@ -2,8 +2,7 @@ const inquirer = require('inquirer');
 const chalk = require('chalk');
 
 module.exports = function (mail) {
-  console.log(mail)
-  inquirer.prompt([
+  return inquirer.prompt([
     {
       type: 'input',
       name: 'subject',
