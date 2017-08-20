@@ -9,8 +9,8 @@ module.exports = function send({ text, from, to, subject, threadId }) {
     'Content-Type: text/plain; charset=\"UTF-8\"',
     'MIME-Version: 1.0',
     `Subject: ${subject}`,
-    `From: ${to}`,
-    `To: ${from}\n`,
+    `From: ${from}`,
+    `To: ${to}\n`,
     `${text}`,
   ];
   console.log(chalk.cyan(arr.join('\n')));
