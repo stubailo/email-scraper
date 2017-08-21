@@ -10,21 +10,21 @@ const scopes = [
 ];
 
 const loginUrl = async () => {
-  const auth = await oauth2Client();
-  return auth.generateAuthUrl({ access_type: 'offline', scope: scopes });
-};
+  const auth = await oauth2Client()
+  return auth.generateAuthUrl({ access_type: 'offline', scope: scopes })
+}
 
 async function getToken(code) {
   const oauth = await oauth2Client();
   return new Promise((resolve, reject) => {
     oauth.getToken(code, (err, tokens) => {
-      resolve({ tokens });
-    });
-  });
+      resolve({ tokens })
+    })
+  })
 }
 
 function getProfile(accessToken) {
-  return createFetch({ accessToken, endpoint: '/gmail/v1/users/me/profile' });
+  return createFetch({ accessToken, endpoint: '/gmail/v1/users/me/profile' })
 }
 
 async function getMessagesList(params) {
@@ -35,20 +35,17 @@ async function getMessagesList(params) {
     endpoint: '/gmail/v1/users/me/messages',
     base: 'https://www.googleapis.com',
     urlParams: {},
-  };
-
-  if (params.filter && typeof params.filter === 'string') {
-    state.urlParams.q = params.filter;
   }
 
-  if (params.next) {
-    state.urlParams.pageToken = params.next;
-  }
+  if (params.filter &&
+  typeof params.filter === 'string') state.urlParams.q = params.filter
 
-  const resp = await createFetch(state);
-  const { messages, nextPageToken } = resp;
+  if (params.next) state.urlParams.pageToken = params.next
 
-  return { messages, next: nextPageToken };
+  const resp = await createFetch(state)
+  const { messages, nextPageToken } = resp
+
+  return { messages, next: nextPageToken }
 }
 
 async function getEmail(params) {
@@ -59,16 +56,13 @@ async function getEmail(params) {
 
 async function getEmails(params) {
   let { accessToken, messages, format } = params;
-  if (!messages || !messages.length || !messages.length > 0) {
-    throw new Error('Error');
-  }
-  if (!format) {
-    format = 'metadata';
-  }
+  if (!messages || !messages.length || !messages.length > 0) throw new Error('Error')
+  if (!format) format = 'metadata'
+
   return Promise.all(messages.map(async (message) => {
-    const endpoint = `/gmail/v1/users/me/messages/${message.id}`;
-    return createFetch({ accessToken, endpoint, urlParams: { format } });
-  }));
+    const endpoint = `/gmail/v1/users/me/messages/${message.id}`
+    return createFetch({ accessToken, endpoint, urlParams: { format } })
+  }))
 }
 
 module.exports = {
@@ -77,5 +71,5 @@ module.exports = {
   getEmails,
   getEmail,
   getMessagesList,
-  getProfile,
-};
+  getProfile
+}

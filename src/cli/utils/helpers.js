@@ -31,47 +31,48 @@ const parseMessage = (raw) => {
 
 const quickMailParse = source => new Promise((resolve, reject) => {
   simpleParser(source).then((mail) => {
-    resolve(mail);
-  });
-});
+    resolve(mail)
+  })
+})
 
 const parseAndFormatMail = async (source) => {
-  const mail = await quickMailParse(source);
-  mail.html = 'undefined';
-  mail.textAsHtml = 'undefined';
-  const arr = [];
+  const mail = await quickMailParse(source)
+  mail.html = 'undefined'
+  mail.textAsHtml = 'undefined'
+  const arr = []
   Object.keys(mail).forEach((key) => {
     if (typeof mail[key] === 'string' && mail[key] !== 'undefined') {
-      arr.push(`${chalk.green(`${key}: `)}${mail[key]}`);
+      arr.push(`${chalk.green(`${key}: `)}${mail[key]}`)
     } else if (mail[key].hasOwnProperty('value')) {
-      arr.push(`${chalk.green(`${key}: `)}${mail[key].value[0].address}`);
+      arr.push(`${chalk.green(`${key}: `)}${mail[key].value[0].address}`)
     }
-  });
-  return arr;
-};
+  })
+  return arr
+}
 
 async function saveMessagesInMemory(count) {
-  const { accessToken, next, searchFilter } = this;
+  const { accessToken, next, searchFilter } = this
 
-  const resp = await getMessagesList({ accessToken, next, filter: searchFilter });
+  const resp = await getMessagesList({ accessToken, next, filter: searchFilter })
   const start = count - 20 >= 0 ? count - 20 : 0;
 
-  const input = resp.messages.slice(start, count).filter(message => !this.messages[message.id]);
+  const input = resp.messages.slice(start, count).filter(message => !this.messages[message.id])
+
   if (input && input.length > 0) {
-    const messages = await getEmails({ accessToken, messages: input, count, format: 'full' });
+    const messages = await getEmails({ accessToken, messages: input, count, format: 'full' })
     messages.forEach((message) => {
       if (!this.messages.hasOwnProperty[message.id]) {
         this.messages[message.id] = message;
       }
-    });
+    })
   }
 }
 
 const printHeader = (account, messages) => {
-  console.log(chalk.bold(`Welcome ${account.emailAddress}!`));
-  console.log(chalk.bold(`Total messages: ${account.messagesTotal}`));
-  console.log(chalk.bold(`Token expires on ${moment(account.tokens.expiry_date, 'x').format()}`));
-  console.log(chalk.yellow(`Messages in view: ${messages.length}`));
+  console.log(chalk.bold(`Welcome ${account.emailAddress}!`))
+  console.log(chalk.bold(`Total messages: ${account.messagesTotal}`))
+  console.log(chalk.bold(`Token expires on ${moment(account.tokens.expiry_date, 'x').format()}`))
+  console.log(chalk.yellow(`Messages in view: ${messages.length}`))
 };
 
 module.exports = {
