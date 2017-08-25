@@ -20,8 +20,8 @@ async function inboxViewLogic (answers, messages) {
     case typeof answers.menu === 'number':
       this.currentPage = answers.menu;
 
-      if (this.currentPage % 5 === 1 && this.currentPage > 1) {
-        this.next = resp.next;
+      if (this.currentPage % 10 === 1 && this.currentPage > 1) {
+
       }
       this.configureInboxView();
       break;
@@ -45,7 +45,7 @@ async function inboxViewLogic (answers, messages) {
       break;
     case /[0-9\w]+/.test(answers.menu):
       var id = answers.menu;
-      
+
       var raw = await getEmail({ accessToken, id, format: 'raw' });
       var source = base64url.decode(raw.raw);
       this.nav({

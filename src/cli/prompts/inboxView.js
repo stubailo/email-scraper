@@ -19,13 +19,13 @@ module.exports = async function (choices, type = 'list') {
     choices.unshift({ name: prevPage, value: currentPage - 1 });
   }
   choices.unshift({ name: nextPage, value: currentPage + 1 });
-  
+
 
   return await inquirer.prompt([{
     name: 'menu',
     type,
     message: 'Inbox',
-    pageSize: 20,
+    pageSize: 10,
     choices,
   }])
 };

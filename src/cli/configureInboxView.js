@@ -16,11 +16,12 @@ async function configureInboxView(type = 'list') {
 
   const filter = this.searchFilter;
   const { accounts, account, accessToken, currentPage, next } = this;
-  const count = (currentPage % 10) * 10 > 0 ? (currentPage % 5) * 10 : 100;
-  console.log(chalk.yellow(count))
+  const count = (currentPage % 10) * 10 > 0 ? (currentPage % 10) * 10 : 100;
+  console.log(count)
+  next = count > 100 ? this.next : null
   welcome();
   this.status.start();
-  await this.saveMessagesInMemory(count);
+  await this.saveMessagesInMemory({count, next});
   const messages = Object.keys(this.messages)
     .map(key => this.messages[key])
     .filter(message => !message.trash && message.show)

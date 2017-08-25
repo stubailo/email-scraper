@@ -52,17 +52,19 @@ const parseAndFormatMail = async (source) => {
   return lines
 }
 
-async function saveMessagesInMemory(count) {
+async function saveMessagesInMemory({count, next}) {
   const CACHE_TIME = 5 * 60 * 1000; // 5 minutes in ms
 
-  const { accessToken, next, searchFilter } = this
+  const { accessToken, searchFilter } = this
 
   const resp = await getMessagesList({ accessToken, next, filter: searchFilter })
   const start = count - 10 >= 0 ? count - 10 : 0;
 
-  for(key in this.messages) {
-    this.messages[key] = Object.assign({}, this.messages[key], { show: false })
-  }
+  this.next = resp.next;
+
+  //for(key in this.messages) {
+  //  this.messages[key] = Object.assign({}, this.messages[key], { show: false })
+  //}
 
   const input = resp.messages.slice(start, count)
     .filter(message =>
