@@ -8,9 +8,10 @@ const chalk = require('chalk');
 async function configureInboxView(type = 'list') {
   const now = moment().format('x');
 
-  if (!this.account.tokens.access_token || parseInt(moment(this.account.tokens.expiry_date).format('x')) < now) {
-    console.log(chalk.bold('Please reauthorize this account (undersettings).'));
-    return this.homeMenu(false);
+  if (!this.account.tokens.access_token ||
+    parseInt(moment(this.account.tokens.expiry_date).format('x')) < now) {
+    console.log(chalk.bold('Please reauthorize this account (undersettings).'))
+    return this.homeMenu(false)
   }
 
   const filter = this.searchFilter;
@@ -19,13 +20,17 @@ async function configureInboxView(type = 'list') {
   welcome();
   this.status.start();
   await this.saveMessagesInMemory(count);
-  const messages = Object.keys(this.messages).map(key => 
-    this.messages[key]
-  ).filter(message => !message.trash);
+  const messages = Object.keys(this.messages)
+    .map(key => this.messages[key])
+    .filter(message => !message.trash && message.show);
+
   printHeader(account, messages);
 
   const formattedMessages = parseMessages(messages);
-  const emails = formattedMessages.map(message => ({ value: message.id, name: `${emoji.get('wave')} ${message.headers.subject} (${message.headers.from})` }));
+  const emails = formattedMessages.map(message => ({
+    value: message.id,
+    name: `${emoji.get('wave')} ${message.headers.subject} (${message.headers.from})`
+  }));
 
   this.status.stop();
   const answers = await this.inboxView(emails, type);

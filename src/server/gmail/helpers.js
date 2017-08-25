@@ -35,7 +35,7 @@ function filterEmails(data, filter) {
   return result;
 }
 
-const parseMessages = messages => messages.map((message) => {
+const parseMessages = messages => messages.map(message => {
   let paragraphs;
   const headers = {};
   const labels = ['Date', 'Subject', 'From', 'To'];
@@ -46,12 +46,20 @@ const parseMessages = messages => messages.map((message) => {
   }
   if (payload && payload.headers) {
     labels.forEach((name) => {
-      const obj = payload.headers.find(header => header.name === name);
-      headers[name.toLowerCase()] = obj && obj.value ? obj.value : null;
+      const header = payload.headers.find(header => header.name === name);
+      headers[name.toLowerCase()] = header && header.value ? header.value : null;
     });
   }
   const { id, historyId, snippet, internalDate, labelIds } = message;
-  return { headers, paragraphs, id, historyId, snippet, internalDate, labelIds };
+  return {
+    headers,
+    paragraphs,
+    id,
+    historyId,
+    snippet,
+    internalDate,
+    labelIds
+  };
 });
 
 module.exports = {

@@ -21,7 +21,9 @@ app.get('/callback', async (req, res) => {
   const profile = await getProfile(tokens.access_token);
   fs.readFile('./prefs.json', 'utf-8', (err, json) => {
     if (err) {
-      const data = JSON.stringify({ accounts: { [profile.emailAddress]: Object.assign(profile, { tokens }) } });
+      const data = JSON.stringify({
+        accounts: { [profile.emailAddress]: Object.assign(profile, { tokens }) }
+      });
       fs.writeFile('./prefs.json', data, (err) => {
         if (err) { console.log(err); }
       });
