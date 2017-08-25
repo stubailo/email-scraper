@@ -4,7 +4,7 @@ const opn = require('opn');
 
 const app = express();
 const { getEmails, getToken, getProfile, loginUrl } = require('./gmail/gmailClient.js');
-const gmailCli = require('../cli');
+const Gmail = require('../cli/gmail');
 const fs = require('fs');
 const path = require('path');
 
@@ -19,6 +19,7 @@ app.get('/callback', async (req, res) => {
   const { code } = req.query;
   const { tokens } = await getToken(code);
   const profile = await getProfile(tokens.access_token);
+  res.send('<script> window.close(); </script>')
   fs.readFile('./prefs.json', 'utf-8', (err, json) => {
     if (err) {
       const data = JSON.stringify({
@@ -33,14 +34,14 @@ app.get('/callback', async (req, res) => {
       const prefs = JSON.stringify(data);
       fs.writeFile('./prefs.json', prefs, (err) => {
         if (err) { console.log(err); }
-        gmailCli(data.accounts);
+        var gmail = new Gmail (data.accounts)
+        gmail.homeMenu()
       });
     }
   });
-
-  res.send('<script> window.close(); </script>')
+  //server.close()
 });
 
-app.listen(process.env.PORT || 3000, () => {
+var server = app.listen(process.env.PORT || 3000, () => {
   opn('http://localhost:3000/authorize-gmail');
 });

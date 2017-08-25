@@ -34,6 +34,8 @@ const parseMessage = (raw) => {
   return { subject, messageId, from: sender, to };
 };
 
+const quickMailParse = source => simpleParser(source)
+
 const parseAndFormatMail = async (source) => {
   const mail = await simpleParser(source)
   mail.html = 'undefined'
@@ -56,7 +58,11 @@ async function saveMessagesInMemory(count) {
   const { accessToken, next, searchFilter } = this
 
   const resp = await getMessagesList({ accessToken, next, filter: searchFilter })
-  const start = count - 20 >= 0 ? count - 20 : 0;
+  const start = count - 10 >= 0 ? count - 10 : 0;
+
+  for(key in this.messages) {
+    this.messages[key] = Object.assign({}, this.messages[key], { show: false })
+  }
 
   const input = resp.messages.slice(start, count)
     .filter(message =>
