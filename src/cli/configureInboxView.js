@@ -15,9 +15,8 @@ async function configureInboxView(type = 'list') {
   }
 
   const filter = this.searchFilter;
-  const { accounts, account, accessToken, currentPage, next } = this;
-  const count = (currentPage % 10) * 10 > 0 ? (currentPage % 10) * 10 : 100;
-  console.log(count)
+  var { accounts, account, accessToken, currentPage, next } = this;
+  var count = (currentPage % 10) * 10 > 0 ? (currentPage % 10) * 10 : 100;
   next = count > 100 ? this.next : null
   welcome();
   this.status.start();
