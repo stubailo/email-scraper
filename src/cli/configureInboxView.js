@@ -34,6 +34,7 @@ async function configureInboxView(type = 'list') {
     name: `${emoji.get('wave')} ${message.headers.subject} (${message.headers.from})`
   }));
 
+
   this.status.stop();
   const answers = await this.inboxView(emails, type);
   await this.inboxViewLogic(answers, messages)
