@@ -1,17 +1,13 @@
 language: node_js
 node_js:
+- 8
 - 7
 branches:
   only:
   - master
 before_install:
-- npm install -g npm@'>=2.13.5'
 install:
-- npm i nyc -g
-- npm set progress=false
-- npm install
-script:
-- npm run build
+- yarn install
 deploy:
   provider: npm
   email: ben@focuswish.com
