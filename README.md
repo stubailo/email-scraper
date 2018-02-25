@@ -11,8 +11,18 @@ $ npm install -g gmail-cli
 
 ```bash
 gmail-cli
-
 ```
+
+## Setup
+
+Requires a client_id, client_secret, and redirect_uris. 
+
+client_id and secret can be obtained for Google's Gmail API here: [https://console.developers.google.com/start/api?id=gmail](https://console.developers.google.com/start/api?id=gmail)
+
+### Walk-through
+
+
+
 ## License
 
 MIT © [Ben](http://www.focuswish.com)
