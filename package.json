@@ -34,7 +34,7 @@
     "opn": "^5.2.0"
   },
   "bin": {
-    "gmail-cli": "./lib/index.js"
+    "gmail-cli": "./src/index.js"
   },
   "devDependencies": {
     "snazzy": "^7.0.0",
