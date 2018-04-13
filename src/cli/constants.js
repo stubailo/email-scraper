@@ -1,4 +1,4 @@
-const reply = [
+const REPLY = [
   {
     name: 'nav',
     type: 'list',
@@ -24,7 +24,7 @@ const reply = [
   }
 ]
 
-const home = [{
+const HOME = [{
   name: 'home',
   type: 'list',
   message: 'Home',
@@ -33,7 +33,7 @@ const home = [{
 
 const emailRegEx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
-const create = [
+const CREATE = [
   {
     type: 'input',
     name: 'recipient',
@@ -48,7 +48,7 @@ const create = [
     type: 'input',
     name: 'subject',
     message: 'Subject',
-    validate (answer) {
+    validate: (answer) => {
       if (answer.length < 1) {
         return 'Cannot be blank!'
       }
@@ -58,7 +58,7 @@ const create = [
     type: 'input',
     name: 'text',
     message: 'Message',
-    validate (answer) {
+    validate: (answer) => {
       if (answer.length < 1) {
         return 'Cannot be blank!'
       }
@@ -68,7 +68,7 @@ const create = [
 ]
 
 module.exports = {
-  reply,
-  home,
-  create
+  REPLY,
+  HOME,
+  CREATE
 }

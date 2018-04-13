@@ -22,29 +22,29 @@ async function getToken (code) {
   })
 }
 
-function getProfile (accessToken) {
-  return createFetch({ accessToken, endpoint: '/gmail/v1/users/me/profile' })
-}
+const getProfile = accessToken => createFetch({ accessToken, endpoint: '/gmail/v1/users/me/profile' })
 
-async function getMessagesList (params) {
-  const { accessToken } = params
-
-  const state = {
+async function getMessagesList ({
+  filter,
+  next,
+  accessToken
+}) {
+  const urlParams = {
+    maxResults: 10
+  }
+  if (filter) {
+    urlParams.q = filter
+  }
+  if (next) {
+    urlParams.pageToken = next
+  }
+  const { messages, nextPageToken } = await createFetch({
     accessToken,
     endpoint: '/gmail/v1/users/me/messages',
     base: 'https://www.googleapis.com',
-    urlParams: {}
-  }
-
-  if (params.filter &&
-  typeof params.filter === 'string') state.urlParams.q = params.filter
-
-  if (params.next) state.urlParams.pageToken = params.next
-
-  const resp = await createFetch(state)
-  const { messages, nextPageToken } = resp
-
-  return { messages, next: nextPageToken }
+    urlParams
+  })
+  return { messages, nextPageToken }
 }
 
 async function getEmail (params) {
@@ -53,9 +53,7 @@ async function getEmail (params) {
   return createFetch({ accessToken, endpoint, urlParams: { format } })
 }
 
-async function getEmails (params) {
-  let { accessToken, messages, format } = params
-  if (!messages || !messages.length || !messages.length > 0) throw new Error('Error')
+async function getEmails ({ accessToken, messages, format }) {
   if (!format) format = 'metadata'
 
   return Promise.all(messages.map((message) => {

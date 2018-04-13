@@ -5,7 +5,7 @@ const adapter = new FileSync('db.json')
 const db = low(adapter)
 
 db.defaults({ messages: [], prefs: {}, credentials: {} })
- .write()
+  .write()
 
 module.exports = (function () {
   return db

@@ -1,0 +1,7 @@
+{
+  "problems.autoReveal": false,
+  "flow.useNPMPackagedFlow": true,
+  "javascript.validate.enable": false,
+  "standard.enable": true,
+  "standard.usePackageJson": true
+}

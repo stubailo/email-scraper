@@ -1,6 +1,6 @@
 {
   "name": "gmail-cli",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "description": "cli for gmail",
   "author": {
     "name": "Ben",
@@ -38,12 +38,12 @@
   },
   "devDependencies": {
     "snazzy": "^7.0.0",
-    "standard": "^10.0.3"
+    "standard": "^11.0.1"
   },
   "scripts": {
-    "lint": "standard \"./lib/**/*.js\" --verbose | snazzy",
-    "fix": "standard \"./lib/**/*.js\" --verbose --fix | snazzy",
-    "test": "jest",
+    "lint": "standard \"./src/**/*.js\" --verbose | snazzy",
+    "fix": "standard \"./src/**/*.js\" --verbose --fix | snazzy",
+    "test": "",
     "build": "babel src -d lib --copy-files"
   },
   "eslintConfig": {
