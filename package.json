@@ -37,14 +37,13 @@
     "gmail-cli": "./src/index.js"
   },
   "devDependencies": {
+    "npm-patch": "^0.0.43-next.0.20339ae",
     "snazzy": "^7.0.0",
     "standard": "^11.0.1"
   },
   "scripts": {
     "lint": "standard \"./src/**/*.js\" --verbose | snazzy",
-    "fix": "standard \"./src/**/*.js\" --verbose --fix | snazzy",
-    "test": "",
-    "build": "babel src -d lib --copy-files"
+    "fix": "standard \"./src/**/*.js\" --verbose --fix | snazzy"
   },
   "eslintConfig": {
     "extends": "xo-space",
