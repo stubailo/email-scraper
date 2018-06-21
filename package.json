@@ -3,7 +3,7 @@
   "version": "1.0.25",
   "description": "cli for gmail",
   "author": {
-    "name": "Ben",
+    "name": "Ben Gardner",
     "email": "menubar@protonmail.io",
     "url": "https://www.menubar.io"
   },
@@ -29,7 +29,6 @@
     "js-base64": "^2.4.3",
     "lowdb": "^1.0.0",
     "mailparser": "^2.2.0",
-    "minimist": "^1.2.0",
     "node-fetch": "^2.0.0",
     "opn": "^5.2.0",
     "url": "^0.11.0"
@@ -47,19 +46,12 @@
     "lint": "standard \"./src/**/*.js\" --verbose | snazzy",
     "fix": "standard \"./src/**/*.js\" --verbose --fix | snazzy"
   },
-  "eslintConfig": {
-    "extends": "xo-space",
-    "env": {
-      "jest": true,
-      "node": true
-    }
-  },
-  "repository": "unshift/gmail-cli",
-  "jest": {
-    "testEnvironment": "node"
-  },
   "license": "MIT",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/unshift/gmail-cli"
   }
 }
