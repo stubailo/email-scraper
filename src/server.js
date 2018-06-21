@@ -4,14 +4,27 @@ const getPort = require('get-port')
 const url = require('url')
 const oauth2Client = require('./auth')
 const { PORT = 3000 } = process.env
-const { getToken, getProfile } = require('./client')
 const Gmail = require('./gmail')
 const db = require('./db')
+const createFetch = require('./create-fetch')
+
+async function getToken (code) {
+  const oauth = await oauth2Client()
+  return new Promise((resolve, reject) => {
+    oauth.getToken(code, (err, tokens) => {
+      if (err) { reject(err) }
+      resolve({ tokens })
+    })
+  })
+}
+
+const getProfile = accessToken => createFetch({
+  accessToken,
+  endpoint: '/gmail/v1/users/me/profile'
+})
 
 const handler = async (req, res) => {
-  console.log(req.url)
   const parsed = url.parse(req.url, true)
-  console.log(parsed)
   if (!req.url.startsWith('/callback')) return
   const { tokens } = await getToken(parsed.query.code)
   const profile = await getProfile(tokens.access_token)
@@ -24,7 +37,7 @@ const handler = async (req, res) => {
   }
   db.set('prefs.accounts', accounts).write()
   let gmail = new Gmail(accounts)
-  gmail.homeMenu()
+  gmail.renderMain()
   res.writeHead(200, { 'Content-Type': 'text/html' })
   res.end('<script> window.close(); </script>')
 }
@@ -39,7 +52,6 @@ const scopes = [
 ]
 
 getPort({ port: PORT }).then(port => {
-  console.log('http://localhost:' + port)
   server.listen(port, async () => {
     const auth = await oauth2Client()
     const url = await auth.generateAuthUrl({

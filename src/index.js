@@ -12,7 +12,7 @@ async function init () {
   clear()
   let accounts = db.get('prefs.accounts').value()
   if (accounts) {
-    await (new Gmail(accounts)).homeMenu()
+    await (new Gmail(accounts)).renderMain()
   } else {
     console.log(chalk.bold('Authorizing...'))
     await auth()
