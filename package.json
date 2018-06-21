@@ -21,20 +21,22 @@
     "chalk": "^2.3.0",
     "clear": "^0.0.1",
     "clui": "^0.3.6",
-    "express": "^4.16.2",
     "figlet": "^1.2.0",
+    "get-port": "^3.2.0",
     "googleapis": "^25.0.0",
-    "inquirer": "^5.1.0",
+    "inquirer": "^6.0.0",
+    "inquirer-plugin-lazy-list": "^0.0.3",
     "js-base64": "^2.4.3",
     "lowdb": "^1.0.0",
     "mailparser": "^2.2.0",
     "minimist": "^1.2.0",
-    "node-emoji": "^1.8.1",
     "node-fetch": "^2.0.0",
-    "opn": "^5.2.0"
+    "opn": "^5.2.0",
+    "url": "^0.11.0"
   },
   "bin": {
-    "gmail-cli": "./src/index.js"
+    "gmail": "./bin/gmail.js",
+    "gmail-cli": "./bin/gmail.js"
   },
   "devDependencies": {
     "npm-patch": "^0.0.43-next.0.20339ae",

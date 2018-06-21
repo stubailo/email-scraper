@@ -1,7 +1,7 @@
 const google = require('googleapis')
 const OAuth2 = google.auth.OAuth2
 const inquirer = require('inquirer')
-const db = require('../../cli/db')
+const db = require('./db')
 
 async function getCredentials () {
   let cred = db.get('credentials.web').value()

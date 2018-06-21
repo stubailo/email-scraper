@@ -6,18 +6,19 @@ const google = require('googleapis')
 const gmail = google.gmail({ version: 'v1' })
 const btoa = require('btoa')
 const db = require('./db')
-const { parseAndFormatMail, quickMailParse, printHeader } = require('./helpers')
+const { parseAndFormatMail, quickMailParse, printHeader } = require('./util')
 const { REPLY, HOME, CREATE } = require('./constants')
-const emoji = require('node-emoji')
-const { parseMessages } = require('../server/gmail/helpers')
+const format = require('./format')
 const welcome = require('./welcome')
-const oauth2Client = require('../server/gmail/auth')
+const oauth2Client = require('./auth')
 const {
   getEmail,
   getMessagesList,
   getEmails
-} = require('../server/gmail/gmailClient')
+} = require('./client')
 const base64url = require('base64-url')
+const emoji = require('./emoji')
+inquirer.registerPrompt('lazy-list', require('inquirer-plugin-lazy-list'))
 
 class Gmail {
   constructor (accounts) {
@@ -35,11 +36,6 @@ class Gmail {
   }
 
   setState (state) {
-    let shouldUpdate = Math.floor(Date.now() / 1000) % 10 === 0
-    if (shouldUpdate) {
-      console.log(chalk.gray('clearing cache...'))
-      db.set('messages', []).write()
-    }
     this.state = {
       ...this.state,
       ...state
@@ -92,7 +88,9 @@ class Gmail {
       `${text}`
     ]
     console.log(chalk.cyan(arr.join('\n')))
-    const base64EncodedEmail = btoa(arr.join('\n')).replace(/\+/g, '-').replace(/\//g, '_')
+    const base64EncodedEmail = btoa(arr.join('\n'))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
 
     gmail.users.messages.send({
       auth: this.state.client,
@@ -106,27 +104,25 @@ class Gmail {
 
   async replyToMessage (mail, threadId) {
     this.setState({ stale: true })
-    var answers = await inquirer.prompt([
-      {
-        type: 'input',
-        name: 'subject',
-        message: 'Subject',
-        default: mail && mail.subject ? mail.subject : ''
-      }, {
-        type: 'input',
-        name: 'recipient',
-        message: 'To',
-        default: mail && mail.from && mail.from.value[0].address ? mail.from.value[0].address : ''
-      }, {
-        type: 'input',
-        name: 'draft',
-        message: 'Compose message'
-      }, {
-        type: 'confirm',
-        name: 'confirmation',
-        message: 'Send?'
-      }
-    ])
+    const answers = await inquirer.prompt([{
+      type: 'input',
+      name: 'subject',
+      message: 'Subject',
+      default: mail && mail.subject ? mail.subject : ''
+    }, {
+      type: 'input',
+      name: 'recipient',
+      message: 'To',
+      default: mail && mail.from && mail.from.value[0].address ? mail.from.value[0].address : ''
+    }, {
+      type: 'input',
+      name: 'draft',
+      message: 'Compose message'
+    }, {
+      type: 'confirm',
+      name: 'confirmation',
+      message: 'Send?'
+    }])
     if (answers.confirmation) {
       const text = answers.draft
       const { recipient, subject } = answers
@@ -160,28 +156,29 @@ class Gmail {
     this.ui.log.write(
       lines.join('\n')
     )
-    var answers = await inquirer.prompt(REPLY)
-
-    switch (answers.nav) {
-      case 'back':
-        await this.configureInboxView()
-        break
-      case 'reply':
+    const answers = await inquirer.prompt(REPLY)
+    const handlers = {
+      back: () => {
+        this.configureInboxView()
+      },
+      reply: () => {
         this.replyToMessage(mail, threadId)
-        break
-      case 'delete':
+      },
+      delete: () => {
         this.deleteMsg(messageId)
-        await this.configureInboxView()
-        break
-      case 'home':
+        this.configureInboxView()
+      },
+      home: () => {
         this.homeMenu()
-        break
-      case 'exit':
-        process.exit()
+      },
+      exit: () => {
+        process.exit = 0
+      }
     }
+    return handlers[answers.nav]()
   }
 
-  async configureInboxView (type = 'list') {
+  async configureInboxView (type = 'lazy-list') {
     const now = Date.now()
     if (
       !this.state.account.tokens.access_token ||
@@ -190,30 +187,17 @@ class Gmail {
       console.log(chalk.bold('Please reauthorize this account (under settings).'))
       return this.homeMenu(false)
     }
-
-    let {
-      account,
-      page
-    } = this.state
-
-    welcome()
-    this.status.start()
     let cachedMessagesCount = db.get('messages').value().length
-    if (
-      cachedMessagesCount < (page * 10) ||
-      this.state.stale
-    ) {
-      await this.fetchMessages()
-      this.setState({ stale: false })
-    }
-    const messages = db.get('messages').value()
-      .slice((page * 10) - 10, page * 10)
-    printHeader(account.profile, messages)
+    welcome(false, cachedMessagesCount)
+    this.status.start()
+    await this.fetchMessages()
 
-    const formattedMessages = parseMessages(messages)
-    const emails = formattedMessages.map(message => ({
+    const messages = db.get('messages').value()
+    printHeader(this.state.account.profile, messages)
+
+    const emails = format(messages).map(message => ({
       value: message.id,
-      name: `${emoji.get('wave')} ${message.headers.subject} (${message.headers.from})`
+      name: `${message.headers.subject} (${message.headers.from})`
     }))
 
     this.status.stop()
@@ -222,15 +206,17 @@ class Gmail {
   }
 
   async homeMenu (clearfix = true) {
-    welcome(clearfix)
+    let cachedMessagesCount = db.get('messages').value().length
+    welcome(clearfix, cachedMessagesCount)
     let { home } = await inquirer.prompt(HOME)
 
     switch (home) {
       case 'Re-Authorize':
-        require('../server')
+        require('./server')
         break
       case 'Exit':
-        process.exit()
+        process.exit = 0
+        break
       case 'Settings':
         this.showAccounts()
         break
@@ -248,33 +234,35 @@ class Gmail {
     }
   }
 
-  async inboxViewPrompts (answers, messages) {
+  async openEmail (answers, _) {
+    let message = db.get('messages').find(message => message.id === id)
     let accessToken = this.state.account.tokens.access_token
+    let id = answers.menu
+    let raw = await getEmail({ accessToken, id, format: 'raw' })
+    let source = base64url.decode(raw.raw)
+    this.nav({
+      source,
+      messageId: id,
+      threadId: message.threadId || undefined
+    })
+  }
 
-    switch (true) {
-      case answers.menu === 'compose':
+  async inboxViewPrompts (answers, messages) {
+    const handler = {
+      compose: () => {
         inquirer.prompt(CREATE).then((answers) => {
           const { text, subject, recipient } = answers
           const sender = this.state.account.emailAddress
           this.sendNew({ subject, recipient, sender, text })
         }).then(() => { this.configureInboxView() })
-        break
-      case answers.menu === 'bulk':
+      },
+      checkbox: () => {
         this.configureInboxView('checkbox')
-        break
-      case typeof answers.menu === 'number':
-        if (answers.menu % 10 === 0) {
-          db.set('messages', []).write()
-        }
-        this.setState({ page: answers.menu })
-        this.configureInboxView()
-        break
-      case answers.menu === 'home':
-        this.homeMenu()
-        break
-      case answers.menu === 'exit':
-        process.exit()
-      case answers.menu === 'search':
+      },
+      exit: () => {
+        process.exit = 0
+      },
+      search: () => {
         inquirer.prompt([{
           type: 'input',
           name: 'search',
@@ -287,59 +275,70 @@ class Gmail {
           })
           this.configureInboxView()
         })
-        break
-      case /[0-9\w]+/.test(answers.menu):
-        let id = answers.menu
-        let raw = await getEmail({ accessToken, id, format: 'raw' })
-        let source = base64url.decode(raw.raw)
-        this.nav({
-          source,
-          messageId: id,
-          threadId: messages.find(msg => msg.id === id).threadId
-        })
-
-        break
-      default:
-        console.log(chalk.red('Error!'))
+      }
     }
+    if (handler[answers.menu]) {
+      return handler[answers.menu]()
+    }
+    return this.openEmail(answers, messages)
   }
 
-  async inboxView (choices, type = 'list') {
+  async inboxView (choices, type = 'lazy-list') {
     let options = [
       new inquirer.Separator(),
       { name: 'Home', value: 'home' },
       { name: 'Exit', value: 'exit' },
       { name: 'Search', value: 'search' },
       { name: 'Bulk', value: 'bulk' },
-      { name: `Compose ${emoji.get('email')}`, value: 'compose' }
+      { name: `Compose ${emoji.message}`, value: 'compose' }
     ]
 
-    const { page } = this.state
-    const nextPage = `Page ${page + 1} (next) ${emoji.get('arrow_forward')}`
     choices.unshift(new inquirer.Separator())
     choices = choices.concat(options)
-
-    if (page > 1) {
-      const prevPage = `Page ${page - 1} (previous) ${emoji.get('arrow_backward')}`
-      choices.unshift({ name: prevPage, value: page - 1 })
+    const fetchMore = async () => {
+      this.state.page++
+      await this.fetchMessages()
+      const messages = db.get('messages').value()
+      const formattedMessages = format(messages)
+      const emails = formattedMessages.map(message => ({
+        value: message.id,
+        name: `${message.headers.subject} (${message.headers.from})`
+      }))
+      return emails
     }
 
-    choices.unshift({ name: nextPage, value: page + 1 })
-
-    return inquirer.prompt([{
+    let pageSize = 10
+    let inq = inquirer.prompt([{
       name: 'menu',
       type,
       message: 'Inbox',
-      pageSize: 10,
-      choices
+      pageSize: pageSize,
+      choices,
+      onChange: (state, eventType) => {
+        let index = state.selected
+        let listLength = state.opt.choices.realLength
+        let shouldFetchMore = (index + pageSize) > listLength
+        if (
+          eventType === 'onDownKey' &&
+          shouldFetchMore
+        ) {
+          return fetchMore(state.opt.choices.length)
+        }
+      }
     }])
+    return inq
   }
 
   async fetchMessages () {
     const store = db.get('messages')
-    const { token, filter, next } = this.state
-    const resp = await getMessagesList({ accessToken: token, next, filter })
-
+    const { token, filter } = this.state
+    const next = db.get(`pages.${this.state.page}`, undefined).value()
+    const resp = await getMessagesList({
+      accessToken: token,
+      next,
+      filter
+    })
+    db.set(`pages.${this.state.page + 1}`, resp.nextPageToken).write()
     this.setState({ next: resp.nextPageToken })
     let _messages = resp.messages.filter(message =>
       !store.find({id: message.id}).value()
