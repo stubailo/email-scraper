@@ -91,8 +91,8 @@ class Gmail {
     ) {
       require('./server')
     }
-    const messages = db.get('messages').value()
     await this.client.fetchMessages()
+    const messages = db.get('messages').value()
     const emails = format(messages).map(message => ({
       value: message.id,
       name: `${message.headers.subject} (${message.headers.from})`
