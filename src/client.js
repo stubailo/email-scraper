@@ -135,7 +135,7 @@ class Client {
 
   async getMessage (id) {
     let message = db.get('messages').find(message => message.id === id)
-    let accessToken = this.state.account.tokens.access_token
+    let accessToken = this.account.tokens.access_token
     let raw = await getEmail({ accessToken, id, format: 'raw' })
     let source = base64url.decode(raw.raw)
     return {
