@@ -4,7 +4,7 @@
   "description": "cli for gmail",
   "author": {
     "name": "Ben Gardner",
-    "email": "menubar@protonmail.io",
+    "email": "menubar@protonmail.com",
     "url": "https://www.menubar.io"
   },
   "files": [
@@ -34,8 +34,8 @@
     "url": "^0.11.0"
   },
   "bin": {
-    "gmail": "./bin/gmail.js",
-    "gmail-cli": "./bin/gmail.js"
+    "gmail": "bin/gmail.js",
+    "gmail-cli": "bin/gmail.js"
   },
   "devDependencies": {
     "npm-patch": "^0.0.43-next.0.20339ae",
