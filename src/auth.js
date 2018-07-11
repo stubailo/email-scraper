@@ -4,8 +4,9 @@ const inquirer = require('inquirer')
 const db = require('./db')
 
 async function getCredentials () {
-  let cred = db.get('credentials.web').value()
-  if (!cred) {
+  let web = db.get('credentials.web').value()
+  let config = db.get('credentials.config')
+  if (!web) {
     let answers = await inquirer.prompt([{
       type: 'input',
       name: 'client_id',
@@ -22,26 +23,27 @@ async function getCredentials () {
     }])
 
     let { client_id, client_secret, redirect_uris } = answers
-    let web = {
+    let { port } = new URL(redirect_uris)
+
+    web = {
       client_id,
       client_secret,
       redirect_uris: [redirect_uris]
     }
+    config = { port }
     db.set('credentials.web', web).write()
-
-    return web
-  } else {
-    return cred
+    db.set('credentials.config', config).write()
   }
+  return { web, config }
 }
 
 module.exports = async function () {
-  const client = await getCredentials()
-  const oauth2Client = new OAuth2(
-    client.client_id,
-    client.client_secret,
-    client.redirect_uris[0]
+  const { web, config } = await getCredentials()
+  const client = new OAuth2(
+    web.client_id,
+    web.client_secret,
+    web.redirect_uris[0]
   )
 
-  return oauth2Client
+  return client
 }

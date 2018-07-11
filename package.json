@@ -7,9 +7,6 @@
     "email": "menubar@protonmail.com",
     "url": "https://www.menubar.io"
   },
-  "files": [
-    "src"
-  ],
   "main": "src/index.js",
   "keywords": [
     "gmail",
@@ -23,6 +20,7 @@
     "clui": "^0.3.6",
     "figlet": "^1.2.0",
     "get-port": "^3.2.0",
+    "global": "^4.3.2",
     "googleapis": "^25.0.0",
     "inquirer": "^6.0.0",
     "inquirer-plugin-lazy-list": "^0.0.3",

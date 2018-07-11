@@ -1,9 +1,7 @@
 const http = require('http')
 const opn = require('opn')
-const getPort = require('get-port')
 const url = require('url')
 const oauth2Client = require('./auth')
-const { PORT = 3000 } = process.env
 const Gmail = require('./gmail')
 const db = require('./db')
 const createFetch = require('./create-fetch')
@@ -51,13 +49,13 @@ const scopes = [
   'https://www.googleapis.com/auth/gmail.send'
 ]
 
-getPort({ port: PORT }).then(port => {
-  server.listen(port, async () => {
-    const auth = await oauth2Client()
-    const url = await auth.generateAuthUrl({
-      access_type: 'offline',
-      scope: scopes
-    })
-    opn(url)
+const { port = 3000 } = db.get('credentials.config')
+
+server.listen(port, async () => {
+  const auth = await oauth2Client()
+  const url = await auth.generateAuthUrl({
+    access_type: 'offline',
+    scope: scopes
   })
+  opn(url)
 })

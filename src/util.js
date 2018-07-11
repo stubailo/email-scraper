@@ -21,17 +21,6 @@ const prettyPrint = (text) => {
   console.log(chalk.greenBright(text))
 }
 
-const parseMessage = (raw) => {
-  const subject = raw.payload.headers.find(header => header.name === 'Subject').value
-  const messageId = raw.payload.headers.find(header => header.name === 'Message-Id').value
-  const sender = raw.payload.headers.find(header => header.name === 'From').value
-  const to = raw.payload.headers.find(header => header.name === 'To').value
-
-  return { subject, messageId, from: sender, to }
-}
-
-const quickMailParse = source => simpleParser(source)
-
 const parseAndFormatMail = async (source) => {
   const mail = await simpleParser(source)
   mail.html = 'undefined'
@@ -58,7 +47,5 @@ module.exports = {
   headers,
   prettyPrint,
   printHeader,
-  parseMessage,
-  quickMailParse,
   parseAndFormatMail
 }

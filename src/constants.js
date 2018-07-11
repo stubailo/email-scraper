@@ -31,6 +31,7 @@ const HOME = {
   message: 'Home',
   choices: [
     { name: 'Inbox', value: 'inbox' },
+    { name: 'Compose', value: 'compose' },
     { name: 'Settings', value: 'settings' },
     { name: 'Re-Authorize', value: 'authorize' },
     { name: 'Exit', value: 'exit' }
@@ -59,7 +60,7 @@ const CREATE = [{
   }
 }, {
   type: 'input',
-  name: 'text',
+  name: 'handleSend',
   message: 'Message',
   validate: (answer) => {
     if (answer.length < 1) {

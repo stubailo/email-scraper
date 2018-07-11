@@ -3,11 +3,12 @@ const Spinner = CLI.Spinner
 const inquirer = require('inquirer')
 const chalk = require('chalk')
 const db = require('./db')
-const { parseAndFormatMail, quickMailParse } = require('./util')
+const { parseAndFormatMail } = require('./util')
 const { REPLY, HOME, CREATE } = require('./constants')
 const format = require('./format')
 const Client = require('./client')
 const { Subject } = require('rxjs')
+const simpleParser = require('mailparser').simpleParser
 
 inquirer.registerPrompt('lazy-list', require('inquirer-plugin-lazy-list'))
 
@@ -111,7 +112,7 @@ class Gmail {
       raw
     } = await this.client.getMessage(id)
     const lines = await parseAndFormatMail(source)
-    const mail = await quickMailParse(source)
+    const mail = await simpleParser(source)
     this.ui.log.write(lines.join('\n'))
     this.prompts.next(REPLY)
 
@@ -143,7 +144,7 @@ class Gmail {
   async inboxViewPrompts (answers, messages) {
     const handler = {
       compose: () => {
-        inquirer.prompt(...CREATE).then((answers) => {
+        this.prompts.next(...CREATE).then((answers) => {
           const { text, subject, recipient } = answers
           const sender = this.state.account.emailAddress
           this.client.send({ subject, recipient, sender, text })
@@ -170,17 +171,6 @@ class Gmail {
   }
 
   async renderInbox (choices, type = 'lazy-list') {
-    // let options = [
-    //  new inquirer.Separator(),
-    //  { name: 'Home', value: 'home' },
-    //  { name: 'Exit', value: 'exit' },
-    //  { name: 'Search', value: 'search' },
-    //  { name: 'Bulk', value: 'bulk' },
-    //  { name: `Compose ${emoji.message}`, value: 'compose' }
-    // ]
-
-    // choices.unshift(new inquirer.Separator())
-    // choices = choices.concat(options)
     const fetchMore = async () => {
       this.state.page++
       await this.client.fetchMessages(this.state.page)
@@ -245,10 +235,19 @@ class Gmail {
       },
       inbox: () => {
         this.renderAccounts(this.accounts)
+      },
+      compose: () => {
+        this.prompts.next(...CREATE)
       }
     }
-    console.log('handleMain', answer)
     return handlers[answer]()
+  }
+
+  async handleSend (answers) {
+    const { text, subject, recipient } = answers
+    const sender = this.state.account.emailAddress
+    this.client.send({ subject, recipient, sender, text })
+      .then(() => this.configure())
   }
 
   async handleAccounts ({ answer }) {
@@ -264,6 +263,7 @@ class Gmail {
   subscribe () {
     this.inquirer.ui.process.subscribe(
       (answer) => {
+        console.log(answer)
         if (this[answer.name]) {
           return this[answer.name](answer)
         }
