@@ -1,8 +1,6 @@
-gmail.json
 .travis.yml
 *.log
-.babelrc
 .env
 .gitignore
-.yo-rc.json
 images
+.vscode
