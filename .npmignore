@@ -1,6 +1,0 @@
-.travis.yml
-*.log
-.env
-.gitignore
-images
-.vscode
