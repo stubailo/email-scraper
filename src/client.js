@@ -105,38 +105,27 @@ class Client {
   }
 
   async fetchMessages (page, filter) {
-    const store = db.get('messages')
-    const next = db.get(`pages.${page}`, undefined).value()
+    const next = db.get(`pages.${page}`).value() || undefined
     const resp = await getMessagesList({
       accessToken: this.accessToken,
       next,
       filter
     })
     db.set(`pages.${page + 1}`, resp.nextPageToken).write()
-
-    let _messages = resp.messages.filter(message =>
-      !store.find({id: message.id}).value()
-    )
-
-    if (_messages && _messages.length) {
-      const messages = await getEmails({
-        accessToken: this.accessToken,
-        messages: _messages,
-        format: 'full'
-      })
-      db.set(
-        'messages',
-        messages.concat(store.value()).sort((a, b) =>
-          parseInt(b.internalDate) - parseInt(a.internalDate)
-        )
-      ).write()
-    }
+    db.set(`messages`, resp.messages).write()
+    const emails = await getEmails({
+      accessToken: this.accessToken,
+      messages: resp.messages,
+      format: 'full'
+    })
+    return emails
   }
 
   async getMessage (id) {
     let message = db.get('messages').find(message => message.id === id)
     let accessToken = this.account.tokens.access_token
     let raw = await getEmail({ accessToken, id, format: 'raw' })
+    console.log(raw)
     let source = base64url.decode(raw.raw)
     return {
       source,

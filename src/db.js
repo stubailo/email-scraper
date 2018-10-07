@@ -9,6 +9,4 @@ const db = low(adapter)
 db.defaults({ prefs: {}, credentials: {}, pages: {}, messages: [] })
   .write()
 
-module.exports = (function () {
-  return db
-})()
+module.exports = db

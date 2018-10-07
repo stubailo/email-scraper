@@ -2,14 +2,12 @@ const CLI = require('clui')
 const Spinner = CLI.Spinner
 const inquirer = require('inquirer')
 const chalk = require('chalk')
-const db = require('./db')
 const { parseAndFormatMail } = require('./util')
 const { REPLY, HOME, CREATE } = require('./constants')
 const format = require('./format')
 const Client = require('./client')
 const { Subject } = require('rxjs')
 const simpleParser = require('mailparser').simpleParser
-
 inquirer.registerPrompt('lazy-list', require('inquirer-plugin-lazy-list'))
 
 class Gmail {
@@ -92,8 +90,7 @@ class Gmail {
     ) {
       require('./server')
     }
-    await this.client.fetchMessages()
-    const messages = db.get('messages').value()
+    const messages = await this.client.fetchMessages(this.state.page)
     const emails = format(messages).map(message => ({
       value: message.id,
       name: `${message.headers.subject} (${message.headers.from})`
@@ -108,8 +105,7 @@ class Gmail {
   async renderMessage (id) {
     let {
       source,
-      message,
-      raw
+      message
     } = await this.client.getMessage(id)
     const lines = await parseAndFormatMail(source)
     const mail = await simpleParser(source)
@@ -171,12 +167,16 @@ class Gmail {
   }
 
   async renderInbox (choices, type = 'lazy-list') {
-    const fetchMore = async () => {
-      this.state.page++
-      await this.client.fetchMessages(this.state.page)
-      const messages = db.get('messages').value()
+    const fetchMore = async (eventType) => {
+      let { page } = this.state
+      this.state.page = eventType === 'onDownKey'
+        ? page + 1
+        : page > 1
+          ? page - 1
+          : page
+      const messages = await this.client.fetchMessages(this.state.page)
       const formattedMessages = format(messages)
-      const emails = formattedMessages.map(message => ({
+      const emails = formattedMessages.map((message, i) => ({
         value: message.id,
         name: `${message.headers.subject} (${message.headers.from})`
       }))
@@ -192,13 +192,12 @@ class Gmail {
       choices,
       onChange: (state, eventType) => {
         let index = state.selected
-        let listLength = state.opt.choices.realLength
-        let shouldFetchMore = (index + pageSize) > listLength
+        let listLength = state.opt.choices.length
+        let shouldFetchMore = (index + 1) >= listLength
         if (
-          eventType === 'onDownKey' &&
           shouldFetchMore
         ) {
-          return fetchMore(state.opt.choices.length)
+          return fetchMore(eventType)
         }
       }
     })
@@ -263,7 +262,6 @@ class Gmail {
   subscribe () {
     this.inquirer.ui.process.subscribe(
       (answer) => {
-        console.log(answer)
         if (this[answer.name]) {
           return this[answer.name](answer)
         }

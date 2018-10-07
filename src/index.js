@@ -7,7 +7,7 @@ const clear = () => {
   db.set('messages', []).set('pages', {}).write()
 }
 
-async function init () {
+;(async () => {
   clear()
   let accounts = db.get('prefs.accounts').value()
   if (accounts) {
@@ -17,6 +17,4 @@ async function init () {
     await auth()
     require('./server')
   }
-}
-
-init()
+})()

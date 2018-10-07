@@ -34,6 +34,4 @@ const formatMessage = message => {
   }
 }
 
-const format = messages => messages.map(formatMessage)
-
-module.exports = format
+module.exports = messages => messages.map(formatMessage)
