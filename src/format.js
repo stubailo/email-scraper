@@ -5,7 +5,7 @@ const formatMessage = message => {
   let headers = {}
   const { payload } = message
   if (payload) {
-    const { parts } = payload
+    const parts = payload.parts || [{body: payload.body}];
     if (parts && parts.length && parts[0].body) {
       paragraphs = base64.decode(parts[0].body.data)
     }

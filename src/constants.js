@@ -31,6 +31,7 @@ const HOME = {
   message: 'Home',
   choices: [
     { name: 'Inbox', value: 'inbox' },
+    { name: 'Lyft', value: 'search'},
     { name: 'Compose', value: 'compose' },
     { name: 'Settings', value: 'settings' },
     { name: 'Re-Authorize', value: 'authorize' },

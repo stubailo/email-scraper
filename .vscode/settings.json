@@ -3,5 +3,6 @@
   "flow.useNPMPackagedFlow": true,
   "javascript.validate.enable": false,
   "standard.enable": true,
-  "standard.usePackageJson": true
+  "standard.usePackageJson": true,
+  "editor.formatOnSave": true
 }
