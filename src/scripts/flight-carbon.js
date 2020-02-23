@@ -10,6 +10,7 @@ const CODES_TO_LAT_LONG = JSON.parse(
 
 export async function identifyFlights(client) {
   let total = 0;
+  let miles = 0;
   const query =
     "from:chasetravelbyexpedia@link.expediamail.com " +
     "after:2019/1/1 before:2020/1/1";
@@ -18,7 +19,6 @@ export async function identifyFlights(client) {
 
   const itineraryIds = {};
 
-  // TODO: identify duplicate confirmations
   allEmails.forEach(({ headers, content }) => {
     // Deduplicate itinerary IDs from chase travel
     if (headers["reply-to"] === "chasetravelbyexpedia@link.expediamail.com") {
@@ -32,45 +32,8 @@ export async function identifyFlights(client) {
     }
 
     console.log(`${headers.subject}`);
-    const airportCodeRegex = />[^<>]*[^A-Za-z0-9]([A-Z][A-Z][A-Z])[^A-Za-z0-9][^<>]*</g;
 
-    const airportsInThisEmail = [];
-    let match;
-    while ((match = airportCodeRegex.exec(content)) !== null) {
-      if (match[1] === "CSS") {
-        // CSS is a very small airport in Nashua, New Hampshire. In theory
-        // someone could fly there, but in practice this is probably related
-        // to CSS code
-        continue;
-      }
-
-      if (match[1] === "GDS") {
-        // GDS is a reservation system provider
-        continue;
-      }
-
-      airportsInThisEmail.push(match[1]);
-    }
-
-    if (airportsInThisEmail.length % 2 !== 0) {
-      throw new Error(
-        "error: expected email to have an even number of airport codes, but it had",
-        airportsInThisEmail.length
-      );
-      console.log(airportsInThisEmail);
-    }
-
-    const flights = [];
-    let miles = 0;
-
-    // Iterate over pairs of airports
-    for (let i = 0; i < airportsInThisEmail.length / 2; i++) {
-      // Create pairs ['SFO', 'BUR']
-      flights.push([
-        airportsInThisEmail[i * 2],
-        airportsInThisEmail[i * 2 + 1]
-      ]);
-    }
+    const flights = getFlightsFromEmailContent(content);
 
     flights.forEach(([codeStart, codeEnd]) => {
       const [latStart, longStart] = CODES_TO_LAT_LONG[codeStart];
@@ -123,4 +86,44 @@ function distanceInKmBetweenEarthCoordinates(lat1, lon1, lat2, lon2) {
     Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return earthRadiusKm * c;
+}
+
+function getFlightsFromEmailContent(content) {
+  const airportCodeRegex = />[^<>]*[^A-Za-z0-9]([A-Z][A-Z][A-Z])[^A-Za-z0-9][^<>]*</g;
+
+  const airportsInThisEmail = [];
+  let match;
+  while ((match = airportCodeRegex.exec(content)) !== null) {
+    if (match[1] === "CSS") {
+      // CSS is a very small airport in Nashua, New Hampshire. In theory
+      // someone could fly there, but in practice this is probably related
+      // to CSS code
+      continue;
+    }
+
+    if (match[1] === "GDS") {
+      // GDS is a reservation system provider
+      continue;
+    }
+
+    airportsInThisEmail.push(match[1]);
+  }
+
+  if (airportsInThisEmail.length % 2 !== 0) {
+    throw new Error(
+      "error: expected email to have an even number of airport codes, but it had",
+      airportsInThisEmail.length
+    );
+    console.log(airportsInThisEmail);
+  }
+
+  const flights = [];
+
+  // Iterate over pairs of airports
+  for (let i = 0; i < airportsInThisEmail.length / 2; i++) {
+    // Create pairs ['SFO', 'BUR']
+    flights.push([airportsInThisEmail[i * 2], airportsInThisEmail[i * 2 + 1]]);
+  }
+
+  return flights;
 }
