@@ -17,7 +17,7 @@ async function getMessagesList({ filter, next, accessToken }) {
   if (next) {
     params.pageToken = next;
   }
-  const { messages, nextPageToken } = await createFetch(
+  const resp = await createFetch(
     {
       accessToken,
       endpoint: "/gmail/v1/users/me/messages",
@@ -26,7 +26,14 @@ async function getMessagesList({ filter, next, accessToken }) {
     },
     true
   );
-  return { messages, nextPageToken };
+
+  if (!resp.messages) {
+    throw new Error(
+      "no results returned from message list. params: " + JSON.stringify(params)
+    );
+  }
+
+  return resp;
 }
 
 async function getEmail(params) {

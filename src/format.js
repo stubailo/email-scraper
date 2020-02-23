@@ -1,37 +1,47 @@
-const base64 = require('js-base64').Base64
+const base64 = require("js-base64").Base64;
+
+// Need to recursively unroll structure like:
+
+// part = {
+//   mimeType: "text/html", // or "multipart/related"
+//   body: {
+//     size: int,
+//     data: "<base64>"
+//   },
+//   parts: [part] // unclear if both body and parts can coexist...
+// };
+
+// {
+//   message: {
+//     payload: part;
+//   }
+// }
 
 const formatMessage = message => {
-  let paragraphs
-  let headers = {}
-  const { payload } = message
+  let content;
+  let headers = {};
+  const { payload } = message;
   if (payload) {
-    const parts = payload.parts || [{body: payload.body}];
-    if (parts && parts.length && parts[0].body) {
-      paragraphs = base64.decode(parts[0].body.data)
-    }
     if (payload.headers) {
       headers = payload.headers.reduce((acc, { name, value }) => {
-        acc[name.toLowerCase()] = value
-        return acc
-      }, {})
+        acc[name.toLowerCase()] = value;
+        return acc;
+      }, {});
     }
   }
-  const {
-    id,
-    historyId,
-    snippet,
-    internalDate,
-    labelIds
-  } = message
-  return {
-    headers,
-    paragraphs,
-    id,
-    historyId,
-    snippet,
-    internalDate,
-    labelIds
-  }
-}
 
-module.exports = messages => messages.map(formatMessage)
+  if (payload) {
+    const parts = payload.parts || [{ body: payload.body }];
+    if (parts && parts.length && parts[0].body) {
+      paragraphs = base64.decode(parts[0].body.data);
+    }
+  }
+  const { id, historyId, snippet, internalDate, labelIds } = message;
+  return {
+    ...message,
+    headers,
+    paragraphs
+  };
+};
+
+module.exports = messages => messages.map(formatMessage);
