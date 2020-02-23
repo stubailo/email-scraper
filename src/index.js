@@ -17,13 +17,9 @@ const clear = () => {
   let accounts = db.get("prefs.accounts").value();
   if (accounts) {
     if (Object.keys(accounts).length === 1) {
-      runScript(accounts[Object.keys(accounts)[0]])
-        .then((...args) => {
-          console.log("result", ...args);
-        })
-        .catch(e => {
-          console.error("error", e);
-        });
+      runScript(accounts[Object.keys(accounts)[0]]).catch(e => {
+        console.error("error", e);
+      });
     }
 
     return;

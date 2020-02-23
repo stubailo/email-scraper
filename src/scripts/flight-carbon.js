@@ -1,25 +1,12 @@
 import { getAllEmailsFromSearch } from "../gmail";
 import fs from "fs";
 
-function degreesToRadians(degrees) {
-  return (degrees * Math.PI) / 180;
-}
-
-function distanceInKmBetweenEarthCoordinates(lat1, lon1, lat2, lon2) {
-  var earthRadiusKm = 6371;
-
-  var dLat = degreesToRadians(lat2 - lat1);
-  var dLon = degreesToRadians(lon2 - lon1);
-
-  lat1 = degreesToRadians(lat1);
-  lat2 = degreesToRadians(lat2);
-
-  var a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return earthRadiusKm * c;
-}
+// Load up lat, long pairs
+const CODES_TO_LAT_LONG = JSON.parse(
+  fs.readFileSync(__dirname + "/../../data/airport-code-to-lat-lng.json", {
+    encoding: "utf-8"
+  })
+);
 
 export async function identifyFlights(client) {
   let total = 0;
@@ -29,8 +16,21 @@ export async function identifyFlights(client) {
 
   const allEmails = await getAllEmailsFromSearch(client, query, 40);
 
+  const itineraryIds = {};
+
   // TODO: identify duplicate confirmations
   allEmails.forEach(({ headers, content }) => {
+    // Deduplicate itinerary IDs from chase travel
+    if (headers["reply-to"] === "chasetravelbyexpedia@link.expediamail.com") {
+      const itineraryId = headers.subject.split(" ")[
+        headers.subject.split(" ").length - 1
+      ];
+      if (itineraryIds[itineraryId]) {
+        return;
+      }
+      itineraryIds[itineraryId] = true;
+    }
+
     console.log(`${headers.subject}`);
     const airportCodeRegex = />[^<>]*[^A-Za-z0-9]([A-Z][A-Z][A-Z])[^A-Za-z0-9][^<>]*</g;
 
@@ -61,6 +61,7 @@ export async function identifyFlights(client) {
     }
 
     const flights = [];
+    let miles = 0;
 
     // Iterate over pairs of airports
     for (let i = 0; i < airportsInThisEmail.length / 2; i++) {
@@ -71,16 +72,55 @@ export async function identifyFlights(client) {
       ]);
     }
 
-    // // Load up lat, long pairs
-    // const codeToLatLong = fs.readFileSync(
-    //   __dirname + "../data/airport-codes_json.json",
-    //   { encoding: "utf-8" }
-    // );
+    flights.forEach(([codeStart, codeEnd]) => {
+      const [latStart, longStart] = CODES_TO_LAT_LONG[codeStart];
+      const [latEnd, longEnd] = CODES_TO_LAT_LONG[codeEnd];
 
-    console.log(flights);
+      const distanceInKm = distanceInKmBetweenEarthCoordinates(
+        latStart,
+        longStart,
+        latEnd,
+        longEnd
+      );
+
+      // Assuming 115g per passenger per km
+      // Per https://www.carbonindependent.org/22.html
+      const carbonKg = distanceInKm * 0.115;
+
+      console.log(
+        `${codeStart} -> ${codeEnd}`,
+        `${Math.round(distanceInKm)}km`,
+        `${Math.round(carbonKg)}kg carbon`
+      );
+
+      miles += distanceInKm * 0.621371;
+      total += carbonKg;
+    });
   });
 
-  console.log("number of rides", allEmails.length);
+  console.log("number of flights", allEmails.length);
   console.log("total miles", Math.round(total));
   console.log("total co2 kg", Math.round(total * 0.411));
+}
+
+// From Stack Overflow here:
+// https://stackoverflow.com/questions/365826/calculate-distance-between-2-gps-coordinates
+function degreesToRadians(degrees) {
+  return (degrees * Math.PI) / 180;
+}
+
+function distanceInKmBetweenEarthCoordinates(lat1, lon1, lat2, lon2) {
+  var earthRadiusKm = 6371;
+
+  var dLat = degreesToRadians(lat2 - lat1);
+  var dLon = degreesToRadians(lon2 - lon1);
+
+  lat1 = degreesToRadians(lat1);
+  lat2 = degreesToRadians(lat2);
+
+  var a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return earthRadiusKm * c;
 }
