@@ -2,7 +2,7 @@ const http = require("http");
 const opn = require("opn");
 const url = require("url");
 const oauth2Client = require("./auth");
-const Gmail = require("./gmail");
+import { Gmail } from "./gmail";
 const db = require("./db");
 const createFetch = require("./create-fetch");
 

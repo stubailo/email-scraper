@@ -10,7 +10,7 @@ const { Subject } = require("rxjs");
 const simpleParser = require("mailparser").simpleParser;
 inquirer.registerPrompt("lazy-list", require("inquirer-plugin-lazy-list"));
 
-class Gmail {
+export class Gmail {
   constructor(accounts) {
     this.accounts = accounts;
     this.status = new Spinner("Loading...");
@@ -266,4 +266,17 @@ class Gmail {
   }
 }
 
-module.exports = Gmail;
+export async function getAllEmailsFromSearch(client, q, pageLimit) {
+  let page = 1;
+  let hasMoreMessages = true;
+  let allEmails = [];
+
+  while (hasMoreMessages && page < pageLimit) {
+    const { messages, hasMore } = await client.fetchMessages(page, q);
+    hasMoreMessages = hasMore;
+    page++;
+    allEmails = allEmails.concat(formatMessages(messages));
+  }
+
+  return allEmails;
+}

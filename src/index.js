@@ -2,7 +2,6 @@
 require("reify");
 
 const chalk = require("chalk");
-const Gmail = require("./gmail");
 const db = require("./db");
 const auth = require("./auth");
 const runScript = require("./runScript");
@@ -28,7 +27,6 @@ const clear = () => {
     }
 
     return;
-    // await (new Gmail(accounts)).renderMain()
   } else {
     console.log(chalk.bold("Authorizing..."));
     await auth();
