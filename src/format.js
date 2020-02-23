@@ -17,8 +17,7 @@ const base64 = require("js-base64").Base64;
 //   }
 // }
 
-const formatMessage = message => {
-  let content;
+function formatMessage(message) {
   let headers = {};
   const { payload } = message;
   if (payload) {
@@ -29,19 +28,37 @@ const formatMessage = message => {
       }, {});
     }
   }
+  const content = unrollPart(payload);
 
-  if (payload) {
-    const parts = payload.parts || [{ body: payload.body }];
-    if (parts && parts.length && parts[0].body) {
-      paragraphs = base64.decode(parts[0].body.data);
-    }
-  }
   const { id, historyId, snippet, internalDate, labelIds } = message;
+
   return {
     ...message,
     headers,
-    paragraphs
+    content
   };
-};
+}
 
-module.exports = messages => messages.map(formatMessage);
+// returns string with decoded contents of this part, recursively
+function unrollPart(part) {
+  if (!part) {
+    return "";
+  }
+
+  let result = "";
+
+  // TODO: do we need to inspect content that isn't type text/html
+  if (part.body && part.body.size > 0 && part.mimeType === "text/html") {
+    result += base64.decode(part.body.data);
+  }
+
+  if (part.parts) {
+    result += part.parts.map(p => unrollPart(p)).join(" ");
+  }
+
+  return result;
+}
+
+export function formatMessages(messages) {
+  return messages.map(formatMessage);
+}

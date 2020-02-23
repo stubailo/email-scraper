@@ -1,5 +1,5 @@
 const Client = require("./client");
-const format = require("./format");
+const { formatMessages } = require("./format");
 
 module.exports = async function runScript(account) {
   const client = await Client.create(account);
@@ -91,23 +91,7 @@ async function getAllEmailsFromSearch(client, q, pageLimit) {
     const { messages, hasMore } = await client.fetchMessages(page, q);
     hasMoreMessages = hasMore;
     page++;
-    const emails = format(messages).map(message => {
-      let paragraphs = [];
-      if (Array.isArray(message.paragraphs.length)) {
-        paragraphs = message.paragraphs;
-      } else {
-        paragraphs = [message.paragraphs];
-      }
-
-      content = paragraphs.join();
-
-      return {
-        content,
-        ...message
-      };
-    });
-
-    allEmails = allEmails.concat(emails);
+    allEmails = allEmails.concat(formatMessages(messages));
   }
 
   return allEmails;
