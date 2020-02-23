@@ -10,34 +10,34 @@ const CODES_TO_LAT_LONG = JSON.parse(
 
 export async function identifyFlights(client) {
   let total = 0;
-  let miles = 0;
-  const query =
-    "from:chasetravelbyexpedia@link.expediamail.com " +
-    "after:2019/1/1 before:2020/1/1";
+  let totalMiles = 0;
 
-  const allEmails = await getAllEmailsFromSearch(client, query, 40);
+  const chaseEmails = await getChaseEmails(client);
+  const southwestEmails = await getSouthwestEmails(client);
+  // TODO: couldn't get united to work
+  // const unitedEmails = await getUnitedEmails(client);
 
-  const itineraryIds = {};
+  const allEmails = chaseEmails.concat(southwestEmails);
 
   allEmails.forEach(({ headers, content }) => {
-    // Deduplicate itinerary IDs from chase travel
-    if (headers["reply-to"] === "chasetravelbyexpedia@link.expediamail.com") {
-      const itineraryId = headers.subject.split(" ")[
-        headers.subject.split(" ").length - 1
-      ];
-      if (itineraryIds[itineraryId]) {
-        return;
-      }
-      itineraryIds[itineraryId] = true;
-    }
-
     console.log(`${headers.subject}`);
-
-    const flights = getFlightsFromEmailContent(content);
+    const flights = getFlightsFromEmail({ headers, content });
 
     flights.forEach(([codeStart, codeEnd]) => {
-      const [latStart, longStart] = CODES_TO_LAT_LONG[codeStart];
-      const [latEnd, longEnd] = CODES_TO_LAT_LONG[codeEnd];
+      let latStart, longStart, latEnd, longEnd;
+      try {
+        [latStart, longStart] = CODES_TO_LAT_LONG[codeStart];
+      } catch (e) {
+        throw new Error(
+          `could not find coordinates for airport: '${codeStart}'`
+        );
+      }
+
+      try {
+        [latEnd, longEnd] = CODES_TO_LAT_LONG[codeEnd];
+      } catch (e) {
+        throw new Error(`could not find coordinates for airport: '${codeEnd}'`);
+      }
 
       const distanceInKm = distanceInKmBetweenEarthCoordinates(
         latStart,
@@ -56,13 +56,13 @@ export async function identifyFlights(client) {
         `${Math.round(carbonKg)}kg carbon`
       );
 
-      miles += distanceInKm * 0.621371;
+      totalMiles += distanceInKm * 0.621371;
       total += carbonKg;
     });
   });
 
   console.log("number of flights", allEmails.length);
-  console.log("total miles", Math.round(total));
+  console.log("total miles", Math.round(totalMiles));
   console.log("total co2 kg", Math.round(total * 0.411));
 }
 
@@ -88,8 +88,13 @@ function distanceInKmBetweenEarthCoordinates(lat1, lon1, lat2, lon2) {
   return earthRadiusKm * c;
 }
 
-function getFlightsFromEmailContent(content) {
-  const airportCodeRegex = />[^<>]*[^A-Za-z0-9]([A-Z][A-Z][A-Z])[^A-Za-z0-9][^<>]*</g;
+function getFlightsFromEmail({ headers, content }) {
+  let airportCodeRegex = />[^<>]*[^A-Za-z0-9]([A-Z][A-Z][A-Z])[^A-Za-z0-9][^<>]*</g;
+  if (headers.from.startsWith("Southwest")) {
+    airportCodeRegex = />([A-Z][A-Z][A-Z]) [0-9:]+</g;
+  } else if (headers.from.match(/Receipts@united\.com/)) {
+    airportCodeRegex = /\(([A-Z][A-Z][A-Z])\)<\/td>/g;
+  }
 
   const airportsInThisEmail = [];
   let match;
@@ -111,10 +116,15 @@ function getFlightsFromEmailContent(content) {
 
   if (airportsInThisEmail.length % 2 !== 0) {
     throw new Error(
-      "error: expected email to have an even number of airport codes, but it had",
-      airportsInThisEmail.length
+      "expected email to have an even number of airport codes, but it had " +
+        airportsInThisEmail.length +
+        ": " +
+        airportsInThisEmail.join(", ")
     );
-    console.log(airportsInThisEmail);
+  }
+
+  if (airportsInThisEmail.length === 0) {
+    throw new Error("expected email to have airport codes but found none");
   }
 
   const flights = [];
@@ -126,4 +136,42 @@ function getFlightsFromEmailContent(content) {
   }
 
   return flights;
+}
+
+async function getChaseEmails(client) {
+  const chaseQuery =
+    "from:chasetravelbyexpedia@link.expediamail.com " +
+    "after:2019/1/1 before:2020/1/1";
+
+  const itineraryIds = {};
+  const chaseEmails = await getAllEmailsFromSearch(client, chaseQuery, 40);
+  const deduplicatedChaseEmails = chaseEmails.filter(({ headers }) => {
+    // Deduplicate itinerary IDs from chase travel
+    if (headers["reply-to"] === "chasetravelbyexpedia@link.expediamail.com") {
+      const itineraryId = headers.subject.split(" ")[
+        headers.subject.split(" ").length - 1
+      ];
+      if (itineraryIds[itineraryId]) {
+        return false;
+      }
+      itineraryIds[itineraryId] = true;
+      return true;
+    }
+  });
+
+  return deduplicatedChaseEmails;
+}
+
+async function getSouthwestEmails(client) {
+  const query =
+    "subject:(confirmed) from:southwest after:2019/1/1 before:2020/1/1";
+
+  return await getAllEmailsFromSearch(client, query, 40);
+}
+
+async function getUnitedEmails(client) {
+  const query =
+    "subject:(eticket confirmation) from:Receipts@united.com after:2019/1/1 before:2020/1/1";
+
+  return await getAllEmailsFromSearch(client, query, 40);
 }

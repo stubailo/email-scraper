@@ -13,8 +13,8 @@ module.exports = async function runScript(account) {
     require("./server");
   }
 
-  await countLyftCarbon(client);
-  await countUberCarbon(client);
+  // await countLyftCarbon(client);
+  // await countUberCarbon(client);
   await identifyFlights(client);
 
   const endTime = Date.now();

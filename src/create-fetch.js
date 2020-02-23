@@ -1,18 +1,9 @@
 const fetch = require("node-fetch");
 const db = require("./db");
 const fs = require("fs");
+import { getPersistentObject } from "./storage";
 
-let cacheObj = {};
-try {
-  cacheObj = JSON.parse(
-    fs.readFileSync(__dirname + "/../cache.json", {
-      encoding: "utf-8"
-    })
-  );
-} catch (e) {
-  // couldn't find the cache file
-  console.log("initializing new cache");
-}
+let cacheObj = getPersistentObject("gmail");
 
 const headers = token => ({
   Authorization: `Bearer ${token}`,
@@ -61,13 +52,5 @@ function createFetch(params, cache = false) {
       return json;
     });
 }
-
-process.on("beforeExit", code => {
-  fs.writeFileSync(
-    __dirname + "/../cache.json",
-    JSON.stringify(cacheObj, null, 2)
-  );
-  console.log("wrote cache");
-});
 
 module.exports = createFetch;
