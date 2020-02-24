@@ -1,4 +1,4 @@
-const oauth2Client = require("./auth");
+const oauth2Client = require("./auth").default;
 const google = require("googleapis");
 const gmail = google.gmail({ version: "v1" });
 const btoa = require("btoa");

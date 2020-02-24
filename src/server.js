@@ -1,7 +1,7 @@
 const http = require("http");
 const opn = require("opn");
 const url = require("url");
-const oauth2Client = require("./auth");
+import default as oauth2Client, { credentials } = require("./auth");
 import { Gmail } from "./gmail";
 const db = require("./db");
 const createFetch = require("./create-fetch");
@@ -52,7 +52,7 @@ const scopes = [
   "https://www.googleapis.com/auth/gmail.send"
 ];
 
-const { port = 3000 } = db.get("credentials.config");
+const { port = 3000 } = credentials.config;
 
 server.listen(port, async () => {
   const auth = await oauth2Client();

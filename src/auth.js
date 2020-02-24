@@ -3,9 +3,13 @@ const OAuth2 = google.auth.OAuth2;
 const inquirer = require("inquirer");
 const db = require("./db");
 
+import { getPersistentObject } from "./storage";
+
+export const credentials = getPersistentObject("credentials");
+
 async function getCredentials() {
-  let web = db.get("credentials.web").value();
-  let config = db.get("credentials.config");
+  let web = credentials.web;
+  let config = credentials.config;
   if (!web) {
     let answers = await inquirer.prompt([
       {
@@ -35,13 +39,13 @@ async function getCredentials() {
       redirect_uris: [redirect_uris]
     };
     config = { port };
-    db.set("credentials.web", web).write();
-    db.set("credentials.config", config).write();
+    credentials.web = web;
+    credentials.config = config;
   }
   return { web, config };
 }
 
-module.exports = async function() {
+export default async function auth() {
   const { web, config } = await getCredentials();
   const client = new OAuth2(
     web.client_id,
@@ -50,4 +54,4 @@ module.exports = async function() {
   );
 
   return client;
-};
+}

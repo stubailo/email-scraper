@@ -3,7 +3,7 @@ require("reify");
 
 const chalk = require("chalk");
 const db = require("./db");
-const auth = require("./auth");
+const auth = require("./auth").default;
 const runScript = require("./runScript");
 
 const clear = () => {

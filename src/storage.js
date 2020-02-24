@@ -1,6 +1,15 @@
 import fs from "fs";
 
+const namesTaken = {};
+
 export function getPersistentObject(filename) {
+  if (namesTaken[filename]) {
+    throw new Error(
+      "initialized same storage object twice, you might have a name collision in your code:",
+      filename
+    );
+  }
+
   let persistentObject = {};
   const path = __dirname + "/../temp/" + filename + ".json";
 
