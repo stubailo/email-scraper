@@ -1,23 +1,15 @@
 {
   "name": "gmail-cli",
-  "version": "1.0.37",
-  "description": "cli for gmail",
+  "version": "0.0.0",
+  "description": "Scripts to scrape your GMail",
   "author": {
-    "name": "Ben Gardner",
-    "email": "menubar@protonmail.com",
-    "url": "https://www.menubar.io"
+    "name": "Sashko Stubailo",
+    "email": "s.stubailo@gmail.com",
+    "url": "https://github.com/stubailo"
   },
   "main": "src/index.js",
-  "keywords": [
-    "gmail",
-    "cli"
-  ],
   "dependencies": {
-    "base64-url": "^2.1.0",
-    "btoa": "^1.1.2",
-    "chalk": "^2.3.0",
     "clear": "^0.0.1",
-    "clui": "^0.3.6",
     "figlet": "^1.2.0",
     "googleapis": "^25.0.0",
     "inquirer": "^6.0.0",
@@ -30,17 +22,9 @@
     "reify": "^0.20.12",
     "url": "^0.11.0"
   },
-  "bin": {
-    "gmail": "bin/gmail-cli.js"
-  },
   "devDependencies": {
     "npm-patch": "^0.0.43-next.0.20339ae",
-    "snazzy": "^7.0.0",
-    "standard": "^11.0.1"
-  },
-  "scripts": {
-    "lint": "standard \"./src/**/*.js\" --verbose | snazzy",
-    "fix": "standard \"./src/**/*.js\" --verbose --fix | snazzy"
+    "snazzy": "^7.0.0"
   },
   "license": "MIT",
   "publishConfig": {

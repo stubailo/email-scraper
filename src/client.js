@@ -1,11 +1,9 @@
 const oauth2Client = require("./auth").default;
 const google = require("googleapis");
-const gmail = google.gmail({ version: "v1" });
-const btoa = require("btoa");
-const chalk = require("chalk");
-const base64url = require("base64-url");
 const createFetch = require("./create-fetch");
 import { formatMessages } from "./format";
+
+const gmail = google.gmail({ version: "v1" });
 
 const pages = {};
 
