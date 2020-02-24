@@ -18,11 +18,8 @@
     "url": "^0.11.0"
   },
   "license": "MIT",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
   "repository": {
     "type": "git",
-    "url": "git://github.com/unshift/gmail-cli"
+    "url": "https://github.com/stubailo/email-scraper"
   }
 }
