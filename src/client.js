@@ -27,6 +27,10 @@ async function getMessagesList({ filter, next, accessToken }) {
     true
   );
 
+  if (resp.error) {
+    throw new Error(JSON.stringify(resp.error, null, 2));
+  }
+
   if (!resp.messages) {
     throw new Error(
       "no results returned from message list. params: " + JSON.stringify(params)

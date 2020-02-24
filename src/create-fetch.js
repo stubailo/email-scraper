@@ -33,7 +33,7 @@ function createFetch(params, cache = false) {
 
   if (cache) {
     const cached = gmailCache[url];
-    if (cached) {
+    if (cached && !cached.error) {
       return Promise.resolve(cached);
     }
   }
