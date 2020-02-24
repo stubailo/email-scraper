@@ -5,6 +5,7 @@ const btoa = require("btoa");
 const chalk = require("chalk");
 const base64url = require("base64-url");
 const createFetch = require("./create-fetch");
+import { formatMessages } from "./format";
 
 const pages = {};
 
@@ -54,7 +55,7 @@ async function getEmails({ accessToken, messages, format }) {
   );
 }
 
-class Client {
+export default class Client {
   constructor(oauth2Client, account) {
     oauth2Client.setCredentials(account.tokens);
     this.oauth2Client = oauth2Client;
@@ -87,4 +88,17 @@ class Client {
   }
 }
 
-module.exports = Client;
+export async function getAllEmailsFromSearch(client, q, pageLimit) {
+  let page = 1;
+  let hasMoreMessages = true;
+  let allEmails = [];
+
+  while (hasMoreMessages && page < pageLimit) {
+    const { messages, hasMore } = await client.fetchMessages(page, q);
+    hasMoreMessages = hasMore;
+    page++;
+    allEmails = allEmails.concat(formatMessages(messages));
+  }
+
+  return allEmails;
+}

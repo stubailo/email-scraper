@@ -1,4 +1,4 @@
-import { getAllEmailsFromSearch } from "../gmail";
+import { getAllEmailsFromSearch } from "../client";
 import fs from "fs";
 
 // Load up lat, long pairs

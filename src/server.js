@@ -2,7 +2,6 @@ const http = require("http");
 const opn = require("opn");
 const url = require("url");
 import { default as oauth2Client, credentials } from "./auth";
-import { Gmail } from "./gmail";
 const createFetch = require("./create-fetch");
 
 import { prefs } from "./prefs";

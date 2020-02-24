@@ -1,6 +1,5 @@
-const Client = require("./client");
+import Client, { getAllEmailsFromSearch } from "./client";
 const { formatMessages } = require("./format");
-import { getAllEmailsFromSearch } from "./gmail";
 import { identifyFlights } from "./scripts/flight-carbon";
 
 module.exports = async function runScript(account) {
