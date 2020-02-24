@@ -1,8 +1,8 @@
 import Client, { getAllEmailsFromSearch } from "./client";
-const { formatMessages } = require("./format");
+import { formatMessages } from "./format";
 import { identifyFlights } from "./scripts/flight-carbon";
 
-module.exports = async function runScript(account) {
+export async function runScript(account) {
   const client = await Client.create(account);
   const now = Date.now();
   if (
@@ -17,7 +17,7 @@ module.exports = async function runScript(account) {
   await identifyFlights(client);
 
   const endTime = Date.now();
-};
+}
 
 async function countLyftCarbon(client) {
   let total = 0;

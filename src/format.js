@@ -1,4 +1,4 @@
-const base64 = require("js-base64").Base64;
+import { Base64 } from "js-base64";
 
 // Need to recursively unroll structure like:
 
@@ -49,7 +49,7 @@ function unrollPart(part) {
 
   // TODO: do we need to inspect content that isn't type text/html
   if (part.body && part.body.size > 0 && part.mimeType === "text/html") {
-    result += base64.decode(part.body.data);
+    result += Base64.decode(part.body.data);
   }
 
   if (part.parts) {

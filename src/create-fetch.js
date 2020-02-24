@@ -1,8 +1,8 @@
-const fetch = require("node-fetch");
-const fs = require("fs");
+import fetch from "node-fetch";
+import fs from "fs";
 import { getPersistentObject } from "./storage";
 
-let cacheObj = getPersistentObject("gmail");
+const gmailCache = getPersistentObject("gmail");
 
 const headers = token => ({
   Authorization: `Bearer ${token}`,
@@ -32,7 +32,7 @@ function createFetch(params, cache = false) {
   const url = handleParams(params);
 
   if (cache) {
-    const cached = cacheObj[`cached.${url}`];
+    const cached = gmailCache[url];
     if (cached) {
       return Promise.resolve(cached);
     }
@@ -46,7 +46,7 @@ function createFetch(params, cache = false) {
     .then(resp => resp.json())
     .then(json => {
       if (cache) {
-        cacheObj[`cached.${url}`] = json;
+        gmailCache[url] = json;
       }
       return json;
     });
