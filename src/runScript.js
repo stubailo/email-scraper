@@ -1,6 +1,7 @@
 import Client, { getAllEmailsFromSearch } from "./client";
 import { formatMessages } from "./format";
 import { identifyFlights } from "./scripts/flight-carbon";
+import { findVenmoTransactions } from "./scripts/venmo";
 
 export async function runScript(account) {
   const client = await Client.create(account);
@@ -14,18 +15,21 @@ export async function runScript(account) {
 
   // await countLyftCarbon(client);
   // await countUberCarbon(client);
-  await identifyFlights(client);
+  // await identifyFlights(client);
+  await findVenmoTransactions(client);
 
   const endTime = Date.now();
 }
 
 async function countLyftCarbon(client) {
   let total = 0;
-  const query = 'from:("lyft ride receipt") after:2019/1/1 before:2020/1/1';
 
+  // Filter down emails with Gmail search query
+  const query = 'from:("lyft ride receipt") after:2019/1/1 before:2020/1/1';
   const allEmails = await getAllEmailsFromSearch(client, query, 40);
 
   allEmails.forEach(({ headers, content }) => {
+    // Find ride distance in email by looking for strings like 12.34mi
     const match = content.match(/\(([0-9.]+)mi/);
     if (match) {
       const miles = parseFloat(match[1], 10);

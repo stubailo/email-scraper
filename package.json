@@ -9,6 +9,7 @@
   },
   "main": "src/index.js",
   "dependencies": {
+    "acorn": "^7.1.0",
     "googleapis": "^25.0.0",
     "inquirer": "^6.0.0",
     "js-base64": "^2.4.3",
