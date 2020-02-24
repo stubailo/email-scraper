@@ -13,10 +13,10 @@ export async function runScript(account) {
     require("./server");
   }
 
-  // await countLyftCarbon(client);
+  await countLyftCarbon(client);
   // await countUberCarbon(client);
   // await identifyFlights(client);
-  await findVenmoTransactions(client);
+  // await findVenmoTransactions(client);
 
   const endTime = Date.now();
 }
