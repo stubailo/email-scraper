@@ -17,10 +17,6 @@
     "reify": "^0.20.12",
     "url": "^0.11.0"
   },
-  "devDependencies": {
-    "npm-patch": "^0.0.43-next.0.20339ae",
-    "snazzy": "^7.0.0"
-  },
   "license": "MIT",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
