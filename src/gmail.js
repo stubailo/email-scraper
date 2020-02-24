@@ -100,38 +100,6 @@ export class Gmail {
     this.prompts.next(HOME);
   }
 
-  async renderMessage(id) {
-    let { source, message } = await this.client.getMessage(id);
-    const lines = await parseAndFormatMail(source);
-    const mail = await simpleParser(source);
-    this.ui.log.write(lines.join("\n"));
-    this.prompts.next(REPLY);
-
-    Gmail.prototype.handleMessage = function({ answer }) {
-      let { threadId } = message;
-      let messageId = id;
-      const handlers = {
-        back: () => {
-          this.configure();
-        },
-        reply: () => {
-          this.renderReply(mail, threadId);
-        },
-        delete: () => {
-          this.client.deleteMessage(messageId);
-          this.configure();
-        },
-        home: () => {
-          this.renderMain();
-        },
-        exit: () => {
-          process.exit = 0;
-        }
-      };
-      return handlers[answer]();
-    };
-  }
-
   async inboxViewPrompts(answers, messages) {
     const handler = {
       compose: () => {

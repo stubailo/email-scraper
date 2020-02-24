@@ -3,9 +3,10 @@ const google = require("googleapis");
 const gmail = google.gmail({ version: "v1" });
 const btoa = require("btoa");
 const chalk = require("chalk");
-const db = require("./db");
 const base64url = require("base64-url");
 const createFetch = require("./create-fetch");
+
+const pages = {};
 
 async function getMessagesList({ filter, next, accessToken }) {
   const params = {
@@ -67,14 +68,13 @@ class Client {
   }
 
   async fetchMessages(page, filter) {
-    const next = db.get(`pages.${page}`).value() || undefined;
+    const next = pages[page] || undefined;
     const resp = await getMessagesList({
       accessToken: this.accessToken,
       next,
       filter
     });
-    db.set(`pages.${page + 1}`, resp.nextPageToken).write();
-    db.set(`messages`, resp.messages).write();
+    pages[page + 1] = resp.nextPageToken;
     const emails = await getEmails({
       accessToken: this.accessToken,
       messages: resp.messages,
@@ -83,19 +83,6 @@ class Client {
     return {
       messages: emails,
       hasMore: !!resp.nextPageToken
-    };
-  }
-
-  async getMessage(id) {
-    let message = db.get("messages").find(message => message.id === id);
-    let accessToken = this.account.tokens.access_token;
-    let raw = await getEmail({ accessToken, id, format: "raw" });
-    console.log(raw);
-    let source = base64url.decode(raw.raw);
-    return {
-      source,
-      message,
-      raw
     };
   }
 }

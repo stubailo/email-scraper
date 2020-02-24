@@ -24,7 +24,7 @@ export function getPersistentObject(filename) {
     console.log("initializing new file:", filename + ".json");
   }
 
-  process.on("beforeExit", code => {
+  process.on("exit", code => {
     fs.writeFileSync(path, JSON.stringify(persistentObject, null, 2));
     console.log("wrote storage file:", filename);
   });

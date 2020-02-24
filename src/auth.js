@@ -1,7 +1,6 @@
 const google = require("googleapis");
 const OAuth2 = google.auth.OAuth2;
 const inquirer = require("inquirer");
-const db = require("./db");
 
 import { getPersistentObject } from "./storage";
 

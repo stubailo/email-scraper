@@ -1,10 +1,11 @@
 const http = require("http");
 const opn = require("opn");
 const url = require("url");
-import default as oauth2Client, { credentials } = require("./auth");
+import { default as oauth2Client, credentials } from "./auth";
 import { Gmail } from "./gmail";
-const db = require("./db");
 const createFetch = require("./create-fetch");
+
+import { prefs } from "./prefs";
 
 async function getToken(code) {
   const oauth = await oauth2Client();
@@ -36,11 +37,13 @@ const handler = async (req, res) => {
       tokens
     }
   };
-  db.set("prefs.accounts", accounts).write();
-  let gmail = new Gmail(accounts);
-  gmail.renderMain();
+
+  prefs.accounts = accounts;
+
   res.writeHead(200, { "Content-Type": "text/html" });
   res.end("<script> window.close(); </script>");
+  console.log("Authorized. Please run the script again");
+  process.exit(0);
 };
 
 const server = http.createServer(handler);

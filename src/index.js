@@ -2,19 +2,12 @@
 require("reify");
 
 const chalk = require("chalk");
-const db = require("./db");
 const auth = require("./auth").default;
 const runScript = require("./runScript");
-
-const clear = () => {
-  db.set("messages", [])
-    .set("pages", {})
-    .write();
-};
+const { prefs } = require("./prefs");
 
 (async () => {
-  clear();
-  let accounts = db.get("prefs.accounts").value();
+  let accounts = prefs.accounts;
   if (accounts) {
     if (Object.keys(accounts).length === 1) {
       runScript(accounts[Object.keys(accounts)[0]]).catch(e => {
@@ -27,5 +20,6 @@ const clear = () => {
     console.log(chalk.bold("Authorizing..."));
     await auth();
     require("./server");
+    // TODO run the script after authorizing
   }
 })();

@@ -1,5 +1,4 @@
 const fetch = require("node-fetch");
-const db = require("./db");
 const fs = require("fs");
 import { getPersistentObject } from "./storage";
 
